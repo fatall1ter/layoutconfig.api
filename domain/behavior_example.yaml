@@ -1,0 +1,121 @@
+---
+Open: '10:00:00'
+Close: '23:00:00'
+time_zone: Europe/Moscow
+behavior_config:
+  queue:
+    layouts:
+    - layout_id: '89884907'
+      title: "retail name"
+      threshold: 99.99
+      service_channel:
+        indexes:
+        - kind: work_time
+          weight: 1
+          op: "*"
+        - kind: queue_length
+          weight: 40
+          op: "+"
+        - kind: cashiers_activities
+          weight: 100
+          op: "+"
+    stores:
+    - store_id:
+      title: "store name"
+      threshold: 99.99
+      service_channel:
+        indexes:
+        - kind: work_time
+          weight: 1
+          op: "*"
+        - kind: queue_length
+          weight: 40
+          op: "+"
+        - kind: cashiers_activities
+          weight: 90
+          op: "+"
+    service_channels:
+    - service_channel_id: '131928214'
+      title: Касса №10
+      threshold: 99.99
+      service_channel:
+        indexes:
+        - kind: work_time
+          weight: 1
+          op: "*"
+        - kind: queue_length
+          weight: 100
+          op: "+"
+        - kind: cashiers_activities
+          weight: 100
+          op: "+"
+    - service_channel_id: '66932267'
+      title: Касса №2
+      threshold: 99.99
+      service_channel:
+        indexes:
+        - kind: work_time
+          weight: 1
+          op: "*"
+        - kind: queue_length
+          weight: 100
+          op: "+"
+        - kind: cashiers_activities
+          weight: 100
+          op: "+"
+    - service_channel_id: '73500176'
+      title: Касса №5
+      threshold: 99.99
+      service_channel:
+        indexes:
+        - kind: work_time
+          weight: 1
+          op: "*"
+        - kind: queue_length
+          weight: 100
+          op: "+"
+        - kind: cashiers_activities
+          weight: 100
+          op: "+"
+    - service_channel_id: '80541959'
+      title: Касса №7
+      threshold: 99.99
+      service_channel:
+        indexes:
+        - kind: work_time
+          weight: 1
+          op: "*"
+        - kind: queue_length
+          weight: 100
+          op: "+"
+        - kind: cashiers_activities
+          weight: 100
+          op: "+"
+  recommendations:
+    layouts:
+    - layout_id: '123124324'
+      title: "retail name"
+      std_coef: 0.2
+    stores:
+    - store_id: '234534545'
+      title: "store name"
+      std_coef: 0.015
+    - store_id: '234556487545'
+      title: "store name another"
+      std_coef: 0.005
+  queue_thresholds:
+    layouts:
+    - layout_id: '89884907'
+      title: "retail name"
+      threshold: 3
+      sequence_length: 2
+    stores:
+    - store_id: '242342343'
+      title: "store name"
+      threshold: 2.99
+      sequence_length: 2
+    blocks_service_channels:
+    - block_service_channels_id: '2343245'
+      title: "cash block name"
+      threshold: 2.89
+      sequence_length: 2

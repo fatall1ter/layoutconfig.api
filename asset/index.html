@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <title>WebSockets test</title>
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</head>
+
+<body>
+  <div class="container">
+    <h1>http request</h1>
+    <div class="input-group mb-3">
+      <div class="input-group-prepend">
+        <span class="input-group-text">URL</span>
+      </div>
+      <input type="text" class="form-control" id="api-uri" placeholder="https://some-api/v2/version">
+    </div>
+    <div class="input-group mb-3">
+      <div class="input-group-prepend">
+        <span class="input-group-text">Authorization</span>
+      </div>
+      <input type="text" class="form-control" id="api-auth"  placeholder="Basic asfsdfrgrege==">
+    </div>
+    <button type="button" class="btn btn-primary">Make request</button>
+    <button type="button" class="btn btn-info">clear</button>
+    <div id="api-response"></div>
+    <hr/>
+    <p class="text-white-50 bg-dark">web socket messages:</p>
+    <div id="output"></div>
+  </div>
+  
+
+
+  <script>
+    var loc = window.location;
+    const queryString = window.location.search;
+    const urlParams = new URLSearchParams(queryString);
+    let store_id = urlParams.get('store_id')
+    store_id == null ? store_id="*" : ""
+    var uri = 'ws:';
+    var d = new Date;
+    d.setSeconds(d.getSeconds() - 60);
+    var ds = d.toISOString();
+    if (loc.protocol === 'https:') {
+      uri = 'wss:';
+    }
+    uri += '//' + loc.host+'/v2/chains/events/ws';
+    //uri += loc.pathname + 'ws';
+
+    ws = new WebSocket(uri)
+    let params = {layout_id: "*", from: ds, store_id:store_id};
+    ws.onopen = function() {
+      console.log('Connected')
+      var out = document.getElementById('output');
+      msg = JSON.stringify(params);
+      out.innerHTML += '<div class="card bg-light text-dark col-sm-10"><div class="card-body">Sent: '+msg+'</div></div>';
+      ws.send(JSON.stringify(params));
+    }
+
+    ws.onmessage = function(evt) {
+      var out = document.getElementById('output');
+      out.innerHTML += ' <div class="card bg-light text-dark col-sm-10"><div class="card-body">'+evt.data+'</div></div>';
+    }
+    ws.onclose = function(e) {
+        console.log("WebSocket is closed now.");
+    };
+    $(document).ready(function(){
+      $(".btn-primary").click(function(){
+        $(this).button('toggle');
+         // save to db 
+        var auth = $('#api-auth').val();
+        var url = $('#api-uri').val();
+        console.log(auth, url);
+        $.ajax({
+            beforeSend: function (xhr) {
+                          xhr.setRequestHeader ("Authorization", auth);
+                        },
+            url: url,
+            cache: false,
+            success: function (html) {
+                console.log(html);
+                msg = JSON.stringify(html);
+                //result = $.parseJSON(html);
+                var out = document.getElementById('api-response');
+                out.innerHTML = ' <div class="card bg-light text-dark col-sm-12"><div class="card-body">'+msg+'</div></div>';
+            },
+            error: function (request, status, error){
+                console.log("New history error", request.responseText+"<br>"+error, "code=" + status, 3000, "danger");
+            }
+        });
+
+      });   
+      $(".btn-info").click(function(){
+        var out = document.getElementById('api-response');
+        out.innerHTML = ' <div class="card bg-light text-dark col-sm-12"><div class="card-body"></div></div>';
+      });
+});
+  </script>
+</body>
+
+</html>

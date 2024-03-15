@@ -1,0 +1,38 @@
+---
+version: '2'
+services:
+  layoutconfig.api:
+    restart: always
+    image: hub.watcom.ru/layoutconfig.api:test
+    container_name: layoutconfig.api-test
+    ports: ['2000:8000','2001:8001']
+      environment:
+        LAYOUT_HTTPD_MAIN_HOST_PORT: ":8000"
+        LAYOUT_HTTPD_SERVICE_HOST_PORT: ":8001"
+        LAYOUT_COUNTMAX_VERSION: countmax523
+        LAYOUT_COUNTMAX_SOURCE: api
+        LAYOUT_COUNTMAX_URL: "http://dworker-01.watcom.local:7001"
+        LAYOUT_COUNTMAX_TOKEN: eyJpc3MiOiJ0b3B0YWwuY29tIiwiZXhwIjoxNDI2NDIwODAwLCJodHRwOi8
+        LAYOUT_COUNTMAX_IDS: "5225:2,1000001,1000002"
+        LAYOUT_DEVICEMANAGER_ISUSE: "false"
+        LAYOUT_EVENTS_ISUSE: "false"
+        LAYOUT_CONSUL_SERVICEID: "layoutconfig.api-dev-local"
+        LAYOUT_CONSUL_URL: "elk-01.watcom.local:8500"
+        LAYOUT_CONSUL_ADDRESS: vpn-06.watcom.local
+        LAYOUT_CONSUL_PORT: "2001"
+        LAYOUT_CONSUL_TAGS: "dev,countmax,layoutconfig.api,localhost"
+        LAYOUT_LOG_LEVEL: debug
+    networks: ['layoutconfig.api']
+networks: {layoutconfig.api: {}}
+...
+
+
+---
+version: '2'
+services:
+  www:
+    image: 'registry.gitlab.com/art.frela/www:v0.0.3'
+    restart: always
+    container_name: www
+
+    glpat-sNL1U4C8pskv3vxJKBfH

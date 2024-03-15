@@ -1,0 +1,356 @@
+{
+	"info": {
+		"_postman_id": "51e0393c-0452-48df-87d3-43ed66ff57f7",
+		"name": "data.vkretail.ru",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "get auth flow",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"var jsonData = JSON.parse(responseBody);",
+							"pm.collectionVariables.set(\"flowID\", jsonData.id);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"protocolProfileBehavior": {
+				"disabledSystemHeaders": {
+					"accept": true
+				}
+			},
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Accept",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "{{authURL}}/self-service/login/api",
+					"host": [
+						"{{authURL}}"
+					],
+					"path": [
+						"self-service",
+						"login",
+						"api"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "get token",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"var jsonData = JSON.parse(responseBody);",
+							"pm.collectionVariables.set(\"token\", jsonData.session_token);",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\"identifier\": \"{{login}}\", \"password\": \"{{password}}\", \"method\": \"password\"}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{authURL}}/self-service/login/methods/password?flow={{flowID}}",
+					"host": [
+						"{{authURL}}"
+					],
+					"path": [
+						"self-service",
+						"login",
+						"methods",
+						"password"
+					],
+					"query": [
+						{
+							"key": "flow",
+							"value": "{{flowID}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "get layouts",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{token}}",
+							"type": "string"
+						},
+						{
+							"key": "password",
+							"value": "{{token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer {{token}}",
+						"type": "text",
+						"disabled": true
+					}
+				],
+				"url": {
+					"raw": "{{apiURL}}/v2/layouts",
+					"host": [
+						"{{apiURL}}"
+					],
+					"path": [
+						"v2",
+						"layouts"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "mall get zones",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{token}}",
+							"type": "string"
+						},
+						{
+							"key": "password",
+							"value": "{{token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{apiURL}}/v2/malls/zones?layout_id={{layoutIDMall}}",
+					"host": [
+						"{{apiURL}}"
+					],
+					"path": [
+						"v2",
+						"malls",
+						"zones"
+					],
+					"query": [
+						{
+							"key": "layout_id",
+							"value": "{{layoutIDMall}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "mall get zone attendance",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{token}}",
+							"type": "string"
+						},
+						{
+							"key": "password",
+							"value": "{{token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{apiURL}}/v2/data/attendance/malls/zones?layout_id={{layoutIDMall}}",
+					"host": [
+						"{{apiURL}}"
+					],
+					"path": [
+						"v2",
+						"data",
+						"attendance",
+						"malls",
+						"zones"
+					],
+					"query": [
+						{
+							"key": "layout_id",
+							"value": "{{layoutIDMall}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "get chain stores",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{token}}",
+							"type": "string"
+						},
+						{
+							"key": "password",
+							"value": "{{token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{apiURL}}/v2/chains/stores?layout_id={{layoutIDNet1}}",
+					"host": [
+						"{{apiURL}}"
+					],
+					"path": [
+						"v2",
+						"chains",
+						"stores"
+					],
+					"query": [
+						{
+							"key": "layout_id",
+							"value": "{{layoutIDNet1}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "get chain stores attendance",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{token}}",
+							"type": "string"
+						},
+						{
+							"key": "password",
+							"value": "{{token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{apiURL}}/v2/data/attendance/stores?layout_id={{layoutIDNet1}}",
+					"host": [
+						"{{apiURL}}"
+					],
+					"path": [
+						"v2",
+						"data",
+						"attendance",
+						"stores"
+					],
+					"query": [
+						{
+							"key": "layout_id",
+							"value": "{{layoutIDNet1}}"
+						}
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "apiURL",
+			"value": "https://data.vkretail.ru"
+		},
+		{
+			"key": "authURL",
+			"value": "https://auth.vkretail.ru"
+		},
+		{
+			"key": "token",
+			"value": "empty"
+		},
+		{
+			"key": "login",
+			"value": "demo@data.vkretail.ru"
+		},
+		{
+			"key": "password",
+			"value": "q#HY%AGy5dqk"
+		},
+		{
+			"key": "layoutIDMall",
+			"value": "73685311"
+		},
+		{
+			"key": "layoutIDNet1",
+			"value": "118416189"
+		},
+		{
+			"key": "flowID",
+			"value": ""
+		}
+	]
+}

@@ -1,0 +1,1242 @@
+openapi: 3.0.0
+info:
+  title: API доступа к данным по посещаемости
+  description: Предназначен для команд разработчиков, которым требуется настроить клиентский сервис(ы) импорта данных
+  version: 1.1.18
+
+servers:
+  - url: https://data.vkretail.ru/v2
+    description: Сервер, предоставляющий API
+  # - url: https://auth.vkretail.ru
+  #   description: Сервер аутентификации
+
+
+security:
+  - bearerAuth: []  
+
+tags:
+  - name: layouts
+    description: Все, что касается лэйаутов
+  - name: chains
+    description: Все, что касается магазинов сети и вложенных сущностей
+  - name: malls
+    description: Все, что касается торговых центров и вложенных сущностей
+  - name: data/attendance
+    description: Все, что касается данных о посещаемости
+  - name: reference
+    description: Основные справочники
+paths:
+  /layouts:
+    get:
+      summary: Получить все доступные лэйауты
+      description: Лэйаут является базовым элементом, относительно которого запрашиваются все остальные сущности. 
+      tags:
+        - layouts
+      parameters:
+        - $ref: '#/components/parameters/offsetParam'
+        - $ref: '#/components/parameters/limitParam'
+      responses:
+        '200':
+          description: A list of layouts
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Layout'
+                    minItems: 0
+                    maxItems: 100
+                  result_set:
+                    $ref: '#/components/schemas/ResultSet'
+        default:
+          $ref: '#/components/responses/ErrResponse'
+  /layouts/{layout_id}:
+    get:
+      summary: Получить определенный лэйаут по идентификатору
+      tags:
+        - layouts
+      parameters:
+        - $ref: '#/components/parameters/layoutID'
+      responses:
+        '200':
+          description: Specified layout
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Layout'
+        default:
+          $ref: '#/components/responses/ErrResponse'
+  /chains/stores:
+    get:
+      summary: Получить все магазины в определенной схеме размещения категории сеть
+      description: >
+        Выводит список магазинов, применимы параметры фильтрации layout_id, crm_key, offset, limit, fields, include
+      tags:
+        - chains
+      parameters:
+        - $ref: '#/components/parameters/layoutID'
+        - in: query
+          name: crm_key
+          schema:
+            type: string
+          description: Идентификатор магазина в CRM системе вендора
+        - in: query
+          name: store_ids
+          schema:
+            type: string
+          description: Список идентификаторов магазинов разделенных запятой
+        - in: query
+          name: fields
+          schema:
+            type: string
+          description: Список полей, которые будут выводиться в ответе 
+        - in: query
+          name: include
+          schema:
+            type: string
+          description: Список связанных с магазином сущностей (entrances - проходы, zones - зоны, devices - устройства) 
+        - $ref: '#/components/parameters/offsetParam'
+        - $ref: '#/components/parameters/limitParam'
+      responses:
+        '200':
+          description: Список магазинов
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Store'
+                    minItems: 0
+                    maxItems: 10000
+                  result_set:
+                    $ref: '#/components/schemas/ResultSet'
+        default:
+          $ref: '#/components/responses/ErrResponse'
+  /chains/stores/{store_id}:
+    get:
+      summary: Получить определенный магазин по идентификатору в определенной схеме размещения категории сеть
+      tags:
+        - chains
+      parameters:
+        - $ref: '#/components/parameters/layoutID'
+        - in: path
+          name: store_id
+          schema:
+            type: string
+          description: Идентификатор магазина
+          required: true
+      responses:
+        '200':
+          description: Specified store
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Store'
+        default:
+          $ref: '#/components/responses/ErrResponse'
+  /chains/entrances:
+    get:
+      summary: Получить все проходы в определенной схеме размещения категории сеть
+      description: >
+        Выводит список проходов, применимы параметры фильтрации layout_id, store_id, offset, limit, fields
+      tags:
+        - chains
+      parameters:
+        - $ref: '#/components/parameters/layoutID'
+        - in: query
+          name: store_id
+          schema:
+            type: string
+          description: Идентификатор магазина
+        - in: query
+          name: entrance_ids
+          schema:
+            type: string
+          description: Список идентификаторов проходов разделенных запятой
+        - in: query
+          name: fields
+          schema:
+            type: string
+          description: Список полей, которые будут выводиться в ответе 
+        - $ref: '#/components/parameters/offsetParam'
+        - $ref: '#/components/parameters/limitParam'
+      responses:
+        '200':
+          description: Список проходов
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/ChainEntrance'
+                    minItems: 0
+                    maxItems: 10000
+                  result_set:
+                    $ref: '#/components/schemas/ResultSet'
+        default:
+          $ref: '#/components/responses/ErrResponse'
+  /chains/entrances/{entrance_id}:
+    get:
+      summary: Получить определенный проход по идентификатору в определенной схеме размещения категории сеть
+      tags:
+        - chains
+      parameters:
+        - $ref: '#/components/parameters/layoutID'
+        - in: path
+          name: entrance_id
+          schema:
+            type: string
+          description: Идентификатор прохода
+          required: true
+      responses:
+        '200':
+          description: Specified entrance
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChainEntrance'
+        default:
+          $ref: '#/components/responses/ErrResponse'
+  /malls/entrances:
+    get:
+      summary: Получить все проходы в определенной схеме размещения категории торговый центр
+      description: >
+        Выводит список проходов, применимы параметры фильтрации layout_id, floor_id, offset, limit, fields
+      tags:
+        - malls
+      parameters:
+        - $ref: '#/components/parameters/layoutID'
+        - in: query
+          name: floor_id
+          schema:
+            type: string
+          description: Идентификатор этажа
+        - in: query
+          name: entrance_ids
+          schema:
+            type: string
+          description: Список идентификаторов проходов разделенных запятой
+        - in: query
+          name: fields
+          schema:
+            type: string
+          description: Список полей, которые будут выводиться в ответе 
+        - $ref: '#/components/parameters/offsetParam'
+        - $ref: '#/components/parameters/limitParam'
+      responses:
+        '200':
+          description: Список проходов
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/MallEntrance'
+                    minItems: 0
+                    maxItems: 10000
+                  result_set:
+                    $ref: '#/components/schemas/ResultSet'
+        default:
+          $ref: '#/components/responses/ErrResponse'
+  /malls/entrances/{entrance_id}:
+    get:
+      summary: Получить определенный проход по идентификатору в определенной схеме размещения категории торговый центр
+      tags:
+        - malls
+      parameters:
+        - $ref: '#/components/parameters/layoutID'
+        - in: path
+          name: entrance_id
+          schema:
+            type: string
+          description: Идентификатор прохода
+          required: true
+      responses:
+        '200':
+          description: Specified entrance
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MallEntrance'
+        default:
+          $ref: '#/components/responses/ErrResponse'
+  /malls/zones:
+    get:
+      summary: Получить все зоны в определенной схеме размещения категории торговый центр
+      description: >
+        Выводит список зон, применимы параметры фильтрации layout_id, kind, parent_id, is_online, offset, limit, fields
+      tags:
+        - malls
+      parameters:
+        - $ref: '#/components/parameters/layoutID'
+        - in: query
+          name: kind
+          schema:
+            type: string
+          description: Тип зоны
+        - in: query
+          name: parent_id
+          schema:
+            type: string
+          description: Идентификатор родительской зоны
+        - in: query
+          name: is_online
+          schema:
+            type: string
+            enum:
+              - "1"
+              - "0"
+              - "true"
+              - "false"
+          description: Флаг активен онлайн по зоне или нет
+        - in: query
+          name: fields
+          schema:
+            type: string
+          description: Список полей, которые будут выводиться в ответе 
+        - $ref: '#/components/parameters/offsetParam'
+        - $ref: '#/components/parameters/limitParam'
+      responses:
+        '200':
+          description: Список проходов
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/MallZone'
+                    minItems: 0
+                    maxItems: 10000
+                  result_set:
+                    $ref: '#/components/schemas/ResultSet'
+        default:
+          $ref: '#/components/responses/ErrResponse'
+  /malls/zones/{zone_id}:
+    get:
+      summary: Получить определенную зону по идентификатору в определенной схеме размещения категории торговый центр
+      tags:
+        - malls
+      parameters:
+        - $ref: '#/components/parameters/layoutID'
+        - in: path
+          name: zone_id
+          schema:
+            type: string
+          description: Идентификатор прохода
+          required: true
+      responses:
+        '200':
+          description: Specified zone
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MallZone'
+        default:
+          $ref: '#/components/responses/ErrResponse'
+  /malls/renters:
+    get:
+      summary: Получить всех арендаторов в определенной схеме размещения категории торговый центр
+      description: >
+        Выводит список арендаторов, применимы параметры фильтрации layout_id, categor_id, price_segment_id, contract, offset, limit, fields
+      tags:
+        - malls
+      parameters:
+        - $ref: '#/components/parameters/layoutID'
+        - in: query
+          name: categor_id
+          schema:
+            type: string
+          description: Идентификатор типа товарной категории
+        - in: query
+          name: price_segment_id
+          schema:
+            type: string
+          description: Идентификатор типа ценового сегмента
+        - in: query
+          name: contract
+          schema:
+            type: string
+          description: Наименование договора с арендатором
+        - in: query
+          name: fields
+          schema:
+            type: string
+          description: Список полей, которые будут выводиться в ответе 
+        - $ref: '#/components/parameters/offsetParam'
+        - $ref: '#/components/parameters/limitParam'
+      responses:
+        '200':
+          description: Список арендаторов
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Renter'
+                    minItems: 0
+                    maxItems: 10000
+                  result_set:
+                    $ref: '#/components/schemas/ResultSet'
+        default:
+          $ref: '#/components/responses/ErrResponse'
+  /malls/renters/{renter_id}:
+    get:
+      summary: Получить определенного арендатора по идентификатору в определенной схеме размещения категории торговый центр
+      tags:
+        - malls
+      parameters:
+        - $ref: '#/components/parameters/layoutID'
+        - in: path
+          name: renter_id
+          schema:
+            type: string
+          description: Идентификатор арендатора
+          required: true
+      responses:
+        '200':
+          description: Specified renter
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Renter'
+        default:
+          $ref: '#/components/responses/ErrResponse'
+  /data/attendance/stores:
+    get:
+      summary: Получить посещаемость магазинов в определенной схеме размещения категории сеть
+      description: >
+        Выводит данные по посещаемости (вход/выход/мимоходящие) магазинов, применимы параметры layout_id, store_ids, group_by, use_rawdata, from, to
+      tags:
+        - data/attendance
+      parameters:
+        - $ref: '#/components/parameters/layoutID'
+        - in: query
+          name: store_ids
+          schema:
+            type: string
+          description: Список идентификаторов магазинов разделенных запятой
+        - $ref: '#/components/parameters/groupByParam'  
+        - $ref: '#/components/parameters/useRawDataParam'
+        - $ref: '#/components/parameters/fromParam'
+        - $ref: '#/components/parameters/toParam'
+      responses:
+        '200':
+          description: Данные посещаемости магазинов
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/StoreAttendance'
+                minItems: 0
+        default:
+          $ref: '#/components/responses/ErrResponse'
+  /data/attendance/stores/entrances:
+    get:
+      summary: Получить метрику посещаемость у проходов магазинов в определенной схеме размещения категории сеть
+      description: >
+        Выводит данные по посещаемости (вход/выход/мимоходящие) проходов магазинов, применимы параметры layout_id, entrance_ids, group_by, use_rawdata, from, to
+      tags:
+        - data/attendance
+      parameters:
+        - $ref: '#/components/parameters/layoutID'
+        - in: query
+          name: entrance_ids
+          schema:
+            type: string
+          description: Список идентификаторов проходов магазинов разделенных запятой
+        - $ref: '#/components/parameters/groupByParam'  
+        - $ref: '#/components/parameters/useRawDataParam'
+        - $ref: '#/components/parameters/fromParam'
+        - $ref: '#/components/parameters/toParam'
+      responses:
+        '200':
+          description: Данные посещаемости проходов магазинов
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/EntranceAttendance'
+                minItems: 0
+        default:
+          $ref: '#/components/responses/ErrResponse'
+  /data/attendance/malls/entrances:
+    get:
+      summary: Получить метрику посещаемость у проходов торгового центра в определенной схеме размещения категории торговый центр
+      description: >
+        Выводит данные по посещаемости (вход/выход/мимоходящие) проходов торгового центра, применимы параметры layout_id, entrance_ids, group_by, use_rawdata, from, to
+      tags:
+        - data/attendance
+      parameters:
+        - $ref: '#/components/parameters/layoutID'
+        - in: query
+          name: entrance_ids
+          schema:
+            type: string
+          description: Список идентификаторов проходов торгового центра разделенных запятой
+        - $ref: '#/components/parameters/groupByParam'  
+        - $ref: '#/components/parameters/useRawDataParam'
+        - $ref: '#/components/parameters/fromParam'
+        - $ref: '#/components/parameters/toParam'
+      responses:
+        '200':
+          description: Данные посещаемости проходов торгового центра
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/EntranceAttendance'
+                minItems: 0
+        default:
+          $ref: '#/components/responses/ErrResponse'
+  /data/attendance/malls/renters:
+    get:
+      summary: Получить посещаемость арендаторов торгового центра в определенной схеме размещения категории торговый центр
+      description: >
+        Выводит данные по посещаемости (вход/выход/мимоходящие) арендатров торгового центра, применимы параметры layout_id, renter_ids, group_by, use_rawdata, from, to
+      tags:
+        - data/attendance
+      parameters:
+        - $ref: '#/components/parameters/layoutID'
+        - in: query
+          name: renter_ids
+          schema:
+            type: string
+          description: Список идентификаторов арендаторов торгового центра разделенных запятой
+        - $ref: '#/components/parameters/groupByParam'  
+        - $ref: '#/components/parameters/useRawDataParam'
+        - $ref: '#/components/parameters/fromParam'
+        - $ref: '#/components/parameters/toParam'
+      responses:
+        '200':
+          description: Данные посещаемости арендаторов торгового центра
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/RenterAttendance'
+                minItems: 0
+        default:
+          $ref: '#/components/responses/ErrResponse'
+  /data/attendance/malls/zones:
+    get:
+      summary: Получить посещаемость зон торгового центра в определенной схеме размещения категории торговый центр
+      description: >
+        Выводит данные по посещаемости (вход/выход/мимоходящие) зон торгового центра, применимы параметры layout_id, zone_ids, group_by, use_rawdata, from, to
+      tags:
+        - data/attendance
+      parameters:
+        - $ref: '#/components/parameters/layoutID'
+        - in: query
+          name: zone_ids
+          schema:
+            type: string
+          description: Список идентификаторов зон торгового центра разделенных запятой
+        - $ref: '#/components/parameters/groupByParam'  
+        - $ref: '#/components/parameters/useRawDataParam'
+        - $ref: '#/components/parameters/fromParam'
+        - $ref: '#/components/parameters/toParam'
+      responses:
+        '200':
+          description: Данные посещаемости зон торгового центра
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ZoneAttendance'
+                minItems: 0
+        default:
+          $ref: '#/components/responses/ErrResponse'
+  /data/inside:
+    get:
+      summary: Получить количество посетителей внутри зоны
+      description: >
+        Выводит данные по количеству посетителей внутри зоны, применимы параметры layout_id, zone_id
+      tags:
+        - data/attendance
+      parameters:
+        - $ref: '#/components/parameters/layoutID'
+        - in: query
+          name: zone_id
+          schema:
+            type: string
+          description: Идентификаторов зоны
+      responses:
+        '200':
+          description: Данные по количеству посетителей внутри зоны
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/DataInside'
+                minItems: 0
+        default:
+          $ref: '#/components/responses/ErrResponse'
+  /data/inside/days:
+    get:
+      summary: Получить количество посетителей внутри зоны по интервалам за определенный день
+      description: >
+        Выводит данные по количеству посетителей внутри зоны по интервалам за указанный день, применимы параметры layout_id, zone_id, day
+      tags:
+        - data/attendance
+      parameters:
+        - $ref: '#/components/parameters/layoutID'
+        - in: query
+          name: zone_id
+          schema:
+            type: string
+          description: Идентификаторов зоны
+        - in: query
+          name: day
+          schema:
+            type: string
+            format: date
+          description: Дата в ISO8601 YYYY-MM-DD формате, по умолчанию текущий день
+      responses:
+        '200':
+          description: Данные по количеству посетителей внутри зоны
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/DataInside'
+                minItems: 0
+        default:
+          $ref: '#/components/responses/ErrResponse'
+  /references/categories:
+    get:
+      summary: Получить справочник товарных категорий
+      description: >
+        Выводит справочник товарных категорий, применимы параметры layout_id
+      tags:
+        - reference
+      parameters:
+        - $ref: '#/components/parameters/layoutID'
+      responses:
+        '200':
+          description: Данные справочника товарных категорий
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ReferenceItem'
+                minItems: 0
+        default:
+          $ref: '#/components/responses/ErrResponse'
+  /references/prices:
+    get:
+      summary: Получить справочник ценовых сегментов
+      description: >
+        Выводит справочник ценовых сегментов, применимы параметры layout_id
+      tags:
+        - reference
+      parameters:
+        - $ref: '#/components/parameters/layoutID'
+      responses:
+        '200':
+          description: Данные справочника ценовых сегментов
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ReferenceItem'
+                minItems: 0
+        default:
+          $ref: '#/components/responses/ErrResponse'
+components:
+  securitySchemes:
+    bearerAuth:            # arbitrary name for the security scheme
+      type: http
+      scheme: bearer
+  responses:
+    ErrResponse:
+      description: Some error happen
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              code:
+                description: application-specific error code
+                type: integer
+              error:
+                description: application-level error message, for debugging
+                type: string
+              status:
+                description: user-level status message
+                type: string
+  schemas:
+    ResultSet:
+      type: object
+      properties:
+        count:
+          type: integer
+        limit:
+          type: integer
+        offset:
+          type: integer
+        total:
+          type: integer
+    Layout:
+      properties:
+        id:
+          type: string
+        is_active:
+          type: boolean
+        kind:
+          type: string
+          enum:
+            - chain
+            - mall
+        owner:
+          $ref: '#/components/schemas/CRMCustomer'
+        title:
+          type: string
+      type: object
+    CRMCustomer:
+      properties:
+        id:
+          type: string
+        title:
+          type: string
+      type: object
+    Store:
+      type: object
+      properties:
+        store_id:
+          type: string
+        layout_id:
+          type: string
+        title:
+          type: string
+        kind:
+          type: string
+        area:
+          type: number
+        brands:
+          type: string
+        crm_key:
+          type: string
+        notes:
+          type: string
+        options:
+          type: string        
+        valid_from:
+          type: string
+        valid_to:
+          type: string
+        created_at:
+          type: string
+        creator:
+          type: string
+        modified_at:
+          type: string
+        modifier:
+          type: string
+        devices:
+          type: array
+          items:
+            $ref: '#/components/schemas/Device'
+        entrances:
+          type: array
+          items:
+            $ref: '#/components/schemas/ChainEntrance'
+        zones:
+          type: array
+          items:
+            $ref: '#/components/schemas/ChainZone'
+    Device:
+      type: object
+      properties:
+        created_at:
+          type: string
+        creator:
+          type: string
+        dcmode:
+          description: |-
+            DCMode data collector mode: 
+            active - device transmit data to server;
+            passive - server request data from device
+          type: string
+          enum:
+            - active
+            - passive
+        delay:
+          type: object
+          properties:
+            value:
+              type: integer
+              description: Задержка данных в минутах
+        device_id:
+          type: string
+        ip:
+          type: string
+        is_active:
+          type: boolean
+        kind:
+          type: string
+        layout_id:
+          type: string
+        login:
+          type: string
+        master_id:
+          type: string
+        mode:
+          description: 'Режим работы устройства'
+          type: string
+          enum:
+            - single
+            - master
+            - slave
+        modified_at:
+          type: string
+        modifier:
+          type: string
+        notes:
+          type: string
+        options:
+          type: string
+        password:
+          type: string
+        port:
+          type: string
+        sn:
+          type: string
+        store_id:
+          type: string
+        title:
+          type: string
+        valid_from:
+          type: string
+        valid_to:
+          type: string
+        sensors:
+          type: array
+          items:
+            $ref: '#/components/schemas/Sensor'
+    ChainEntrance:
+      type: object
+      properties:
+        created_at:
+          type: string
+        creator:
+          type: string
+        entrance_id:
+          type: string
+        kind:
+          type: string
+        layout_id:
+          type: string
+        modified_at:
+          type: string
+        modifier:
+          type: string
+        notes:
+          type: string
+        options:
+          type: string
+        store_id:
+          type: string
+        title:
+          type: string
+        valid_from:
+          type: string
+        valid_to:
+          type: string
+        sensors:
+          type: array
+          items:
+            $ref: '#/components/schemas/Sensor'
+    ChainZone:
+      type: object
+      properties:
+        area:
+          type: number
+        created_at:
+          type: string
+        creator:
+          type: string
+        kind:
+          type: string
+        layout_id:
+          type: string
+        modified_at:
+          type: string
+        modifier:
+          type: string
+        notes:
+          type: string
+        options:
+          type: string
+        parent_id:
+          type: string
+        store_id:
+          type: string
+        title:
+          type: string
+        valid_from:
+          type: string
+        valid_to:
+          type: string
+        zone_id:
+          type: string
+        entrances:
+          type: array
+          items:
+            $ref: '#/components/schemas/ChainEntrance'
+        sensors:
+          type: array
+          items:
+            $ref: '#/components/schemas/Sensor'
+    MallZone:
+      type: object
+      properties:
+        area:
+          type: number
+        created_at:
+          type: string
+        creator:
+          type: string
+        kind:
+          type: string
+        layout_id:
+          type: string
+        modified_at:
+          type: string
+        modifier:
+          type: string
+        notes:
+          type: string
+        options:
+          type: string
+        parent_id:
+          type: string
+        store_id:
+          type: string
+        title:
+          type: string
+        valid_from:
+          type: string
+        valid_to:
+          type: string
+        zone_id:
+          type: string
+        entrances:
+          type: array
+          items:
+            $ref: '#/components/schemas/BindingEntranceZone'
+        sensors:
+          type: array
+          items:
+            $ref: '#/components/schemas/Sensor'
+    Sensor:
+      type: object
+      properties:
+        created_at:
+          type: string
+        creator:
+          type: string
+        device_id:
+          type: string
+        external_id:
+          type: string
+        kind:
+          type: string
+        layout_id:
+          type: string
+        modified_at:
+          type: string
+        modifier:
+          type: string
+        notes:
+          type: string
+        options:
+          type: string
+        sensor_id:
+          type: string
+        store_id:
+          type: string
+        title:
+          type: string
+        valid_from:
+          type: string
+        valid_to:
+          type: string
+    MallEntrance:
+      type: object
+      properties:
+        created_at:
+          type: string
+        creator:
+          type: string
+        entrance_id:
+          type: string
+        kind:
+          type: string
+        layout_id:
+          type: string
+        modified_at:
+          type: string
+        modifier:
+          type: string
+        notes:
+          type: string
+        options:
+          type: string
+        floor_id:
+          type: string
+        title:
+          type: string
+        valid_from:
+          type: string
+        valid_to:
+          type: string
+        sensors:
+          type: array
+          items:
+            $ref: '#/components/schemas/Sensor'
+    BindingEntranceZone:
+      type: object
+      properties:
+        created_at:
+          type: string
+        creator:
+          type: string
+        direction:
+          type: string
+        entrance_id:
+          type: string
+        zone_id:
+          type: string
+        entrance_name:
+          type: string
+        kind_zone:
+          type: string
+        modified_at:
+          type: string
+        modifier:
+          type: string
+        options:
+          type: string
+        valid_from:
+          type: string
+        valid_to:
+          type: string
+    Renter:
+      type: object 
+      properties:
+        category_id:
+          type: string
+        contract:
+          type: string
+        created_at:
+          type: string
+        creator:
+          type: string
+        layout_id:
+          type: string
+        modified_at:
+          type: string
+        modifier:
+          type: string
+        notes:
+          type: string
+        options:
+          type: string
+        price_segment_id:
+          type: string
+        renter_id:
+          type: string
+        time_close:
+          type: string
+        time_open:
+          type: string
+        title:
+          type: string
+        valid_from:
+          type: string
+        valid_to:
+          type: string
+        zones:
+          type: array
+          items:
+            $ref: '#/components/schemas/MallZone'
+    StoreAttendance:
+      type: object
+      properties:
+        store_id:
+          type: string
+        points:
+          $ref: '#/components/schemas/AttendanceDataPoints'
+    EntranceAttendance:
+      type: object
+      properties:
+        entrance_id:
+          type: string
+        points:
+          $ref: '#/components/schemas/AttendanceDataPoints'
+    RenterAttendance:
+      type: object
+      properties:
+        renter_id:
+          type: string
+        points:
+          $ref: '#/components/schemas/AttendanceDataPoints'
+    ZoneAttendance:
+      type: object
+      properties:
+        zone_id:
+          type: string
+        points:
+          $ref: '#/components/schemas/AttendanceDataPoints'
+    AttendanceDataPoints:
+      type: array
+      items:
+        type: object
+        properties:
+          passing_by:
+            type: integer
+            format: int32
+            minimum: 0
+          sum_in:
+            type: integer
+            format: int32
+            minimum: 0
+          sum_out:
+            type: integer
+            format: int32
+            minimum: 0
+          time_end:
+            type: string
+            format: date-time
+          time_start:
+            type: string
+            format: date-time
+    DataInside:
+      type: object
+      properties:
+        zone_id:
+          type: string
+        points:
+          $ref: '#/components/schemas/DataPoints'
+    DataPoints:
+      type: array
+      items:
+        type: object
+        properties:
+          time:
+            type: string
+            format: date-time
+          value:
+            type: integer
+            format: int32
+            minimum: 0
+    ReferenceItem:
+      type: object
+      properties:
+        id:
+          type: string
+        title:
+          type: string
+  parameters:
+    offsetParam:      # Can be referenced via '#/components/parameters/offsetParam'
+      name: offset
+      in: query
+      description: Number of items to skip before returning the results.
+      required: false
+      schema:
+        type: integer
+        format: int32
+        minimum: 0
+        maxItems: 10000
+        default: 0
+    limitParam:       # Can be referenced as '#/components/parameters/limitParam'
+      name: limit
+      in: query
+      description: Maximum number of items to return.
+      required: false
+      schema:
+        type: integer
+        format: int32
+        minimum: 1
+        maxItems: 10020
+        default: 20
+    layoutID:
+      name: layout_id
+      in: path
+      required: true
+      schema:
+        type: string
+      description: Идентификатор лэйаута
+    fromParam:      # Can be referenced via '#/components/parameters/fromParam'
+      name: from
+      in: query
+      description: Дата время начала интервала данных
+      required: false
+      schema:
+        type: string
+        format: date-time
+    toParam:      # Can be referenced via '#/components/parameters/toParam'
+      name: to
+      in: query
+      description: Дата время окончания интервала данных
+      required: false
+      schema:
+        type: string
+        format: date-time
+    groupByParam: # Can be referenced via '#/components/parameters/groupByParam'
+      name: group_by
+      in: query
+      description: Интервал группировки данных
+      required: false
+      schema:
+        type: string
+        enum:
+          - "interval"
+          - "1m"
+          - "hour"
+          - "day"
+          - "week"
+          - "month"
+          - "quarter"
+          - "year"
+        default: "interval"
+    useRawDataParam:  # Can be referenced via '#/components/parameters/useRawDataParam'
+      name: use_rawdata
+      in: query
+      description: Флаг использования сырых данных по оборудованию без фильтраций по времени работы объекта 
+      schema:
+        type: string
+        enum:
+          - "1"
+          - "0"
+          - "true"
+          - "false"
+        default: "false"
+             

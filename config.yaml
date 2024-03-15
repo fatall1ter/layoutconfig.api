@@ -1,0 +1,50 @@
+app: # метаданные приложения
+  name: "layoutconfig.api" # наименование приложения
+httpd:
+  main:
+      host_port: ":8001" # хост:порт, который будет пытаться открыть приложения и принимать на него http запросы
+      static: "assets"
+      allow_origin:
+        - "*"
+  service:
+      host_port: ":8002" # хост:порт, который будет пытаться открыть приложения и принимать на него http запросы для метрик и проверки здоровья
+countmax:
+  source: "api" # источник коннектов к базам данных countmax, может быть config - конфигурационный файл или api - url  к ендпоинту откуда получить коннекты по списку
+  url:  "http://dworker-01.watcom.local:7001" #"sqlserver://root:master@study-app:1433?database=CM_Karpov523&connection_timeout=0&encrypt=disable" #"postgres://retail:retail@localhost:5432/retail?sslmode=disable&pool_max_conns=2" #"sqlserver://root:master@study-app:1433?database=CM_GribMall523&connection_timeout=0&encrypt=disable"
+  token: "eyJpc3MiOiJ0b3B0YWwuY29tIiwiZXhwIjoxNDI2NDIwODAwLCJodHRwOi8" # токен авторизации к АПИ для получения коннектов
+  version: countmax523 # верися БД countMax: countmax523/countmax600
+  timeout: 30s # timeout с которым будут работать запросы к БД
+  ids: 6572,3077,2431,7899,1000001,1000002 #123,456,789 # коды 1С клиентов для поиска по ним строк подключения через commonapi
+permissions:
+  policy: allow # allow|deny политика по умолчанию, если не передаются права пользователя в запросе
+  cache:
+    url: memory # memory|redis url TODO: redis implementation
+    expire: 59m
+devicemanager:
+  isuse: true # флаг, использовтаь или нет данную БД в работе
+  url: "postgres://devmgr:devmgr@elk-01.watcom.local:35432/device.manager?sslmode=disable&pool_max_conns=2" #"sqlserver://root:master@study-app:1433?database=CM_Karpov523&connection_timeout=0&encrypt=disable" #"postgres://retail:retail@localhost:5432/retail?sslmode=disable&pool_max_conns=2" #"sqlserver://root:master@study-app:1433?database=CM_GribMall523&connection_timeout=0&encrypt=disable"
+  timeout: 30s # timeout с которым будут работать запросы к БД
+  aliases:
+    src: http://cdn.countmax.ru:9001
+    dest:
+      - https://s3.watcom.ru
+      - https://s3.countmax.ru
+events:
+  isuse: true # флаг, использовтаь или нет данную БД в работе
+  url: "postgres://events:events@elk-01.watcom.local:45432/events?sslmode=disable&pool_max_conns=2" #"sqlserver://root:master@study-app:1433?database=CM_Karpov523&connection_timeout=0&encrypt=disable" #"postgres://retail:retail@localhost:5432/retail?sslmode=disable&pool_max_conns=2" #"sqlserver://root:master@study-app:1433?database=CM_GribMall523&connection_timeout=0&encrypt=disable"
+  timeout: 30s # timeout с которым будут работать запросы к БД
+env: production # тип окружения в котором запускается сервис, production - логи в json формате, все отсальное обычный logrus формат, котрый лучше выводить в текстовый файл и смотреть VSCode-ом
+log:
+  level: debug # уровень логирования сервиса: debug, info, warn, error
+  file: "" # имя файла лога, если пусто или stdout - будет выводить в stdout, если указано имя фацйла, будет писать в него
+consul:
+  url: "elk-01:8500" # адрес consul сервера
+  serviceid: "layoutconfig.api-dev" # уникальный идентификатор сервиса, соответсвует имени контейнера (имена контейнеров во всей системе не должны совпадать)!
+  address: "elk-01.watcom.local" # адрес/fqnd имя сервера по которому будет видент данный сервис, host docker машины
+  port: 8000 # порт по которому доступны метрики и проверка здоровья сервиса снаружи, service.host_port
+tags:
+  "develop,countmax,layoutconfig.api,office" # теги сервиса по которым будет осущестялться поиск и разметка в мониторинге, количетсво и порядок строго определенные
+  #- develop # №1 окружение: develop, stage, production
+  #- countmax # №2 проект откуда сервис: countmax, grib, focus etc...
+  #- layoutconfig.api # №3 семейство сервисов: commonapi, dbscanner, incidentmaker, transport.webui etc...
+  #- office # №4 локация/датацентр где работает сервис
